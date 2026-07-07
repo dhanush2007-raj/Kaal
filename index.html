@@ -2827,23 +2827,50 @@ body { overflow-x: hidden; }
         <button class="btn btn-s btn-sm" onclick="setTimerPreset(50, 10, 30)">Flow 50/10</button>
       </div>
 
-      <!-- Native Desktop Focus Settings (Only shown inside Electron app wrapper) -->
-      <div id="desktop-focus-settings" style="display:none; margin: 15px 0; padding: 12px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); border-radius: 16px; box-sizing: border-box;">
-          <div style="font-weight: 700; font-size: 11.5px; color: var(--text1); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; justify-content: center;">
-              <i class="fa-solid fa-laptop-code" style="color: var(--primary);"></i> NATIVE DESKTOP FOCUS CONTROLS
+      <!-- Native Desktop Focus Settings Accordion Trigger -->
+      <div style="margin: 10px 0; display: flex; justify-content: center;">
+        <button class="btn btn-s btn-sm" id="desktop-settings-toggle-btn" onclick="toggleDesktopFocusSettings()" style="display: none; align-items: center; gap: 6px; border-radius: 50px; padding: 6px 14px; font-size: 11px;">
+          <i class="fa-solid fa-sliders" style="color: var(--primary);"></i> Desktop Focus Settings <i class="fa-solid fa-chevron-down" id="desktop-settings-chevron" style="font-size: 9px; transition: transform 0.3s;"></i>
+        </button>
+      </div>
+
+      <!-- Native Desktop Focus Settings Panel -->
+      <div id="desktop-focus-settings" style="display: none; margin: 15px 0; padding: 16px; background: var(--bg2); border: var(--glass-border); border-radius: var(--r3); box-shadow: var(--shadow1); transition: var(--trans-base); box-sizing: border-box;">
+          <div style="font-weight: 700; font-size: 11px; color: var(--text1); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; justify-content: center; letter-spacing: 0.5px;">
+              <i class="fa-solid fa-laptop-code" style="color: var(--primary);"></i> DESKTOP INTEGRATION CONTROLS
           </div>
-          <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-              <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; cursor: pointer; color: var(--text1);">
+          <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 11.5px; cursor: pointer; color: var(--text1); font-weight: 500;">
                   <input type="checkbox" id="desktop-dnd-enable" checked style="accent-color: var(--primary);">
                   Enable Windows Do Not Disturb (DND)
               </label>
-              <label style="display: flex; align-items: center; gap: 8px; font-size: 11px; cursor: pointer; color: var(--text1); margin-bottom: 2px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 11.5px; cursor: pointer; color: var(--text1); font-weight: 500; margin-bottom: 2px;">
                   <input type="checkbox" id="desktop-block-enable" checked style="accent-color: var(--primary);">
-                  Enable App Blocker (Restrict distracting apps)
+                  Enable Application Restrictions
               </label>
-              <div id="desktop-block-list-container" style="display: flex; flex-direction: column; gap: 4px;">
-                  <span style="font-size: 9.5px; font-weight: 700; color: var(--text2);">BLOCKED APPLICATIONS (comma separated EXEs)</span>
-                  <input type="text" id="desktop-block-list" class="inp" value="chrome.exe, msedge.exe, discord.exe, spotify.exe" style="width: 100%; height: 32px; font-size: 11px; padding: 0 10px; border-radius: 8px; box-sizing: border-box;">
+              
+              <!-- Multi-select searchable app blocker UI -->
+              <div id="desktop-block-list-container" style="display: flex; flex-direction: column; gap: 6px; border-top: 1px dashed rgba(0,0,0,0.06); padding-top: 10px;">
+                  <span style="font-size: 9px; font-weight: 800; color: var(--text2); letter-spacing: 0.5px;">SELECT DISTRACTING APPLICATIONS</span>
+                  
+                  <!-- Selected Tags -->
+                  <div id="desktop-selected-apps" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2px;">
+                      <!-- Populated via Javascript -->
+                  </div>
+
+                  <!-- Custom Searchable Dropdown -->
+                  <div style="position: relative; width: 100%;">
+                      <div id="desktop-dropdown-trigger" onclick="toggleAppDropdown(event)" class="inp" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 11.5px; padding: 0 12px; height: 34px; border-radius: var(--r1); border: var(--glass-border); background: var(--bg3); color: var(--text1); font-weight: 500;">
+                          <span id="desktop-dropdown-trigger-text">Choose apps to block...</span>
+                          <i class="fa-solid fa-chevron-down" style="font-size: 9px; color: var(--text2);"></i>
+                      </div>
+                      <div id="desktop-app-dropdown" style="display: none; position: absolute; top: 38px; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: var(--glass-border); border-radius: var(--r2); box-shadow: var(--shadow2); z-index: 1000; padding: 8px; max-height: 180px; overflow-y: auto;">
+                          <input type="text" id="desktop-app-search" placeholder="Search installed apps..." class="inp" style="width: 100%; height: 28px; font-size: 11px; padding: 0 8px; margin-bottom: 8px; border-radius: var(--r1); border: var(--glass-border); background: var(--bg2); color: var(--text1);" oninput="filterAppDropdown(this.value)">
+                          <div id="desktop-app-list" style="display: flex; flex-direction: column; gap: 4px;">
+                              <!-- Dynamically loaded Win32 apps checklist -->
+                          </div>
+                      </div>
+                  </div>
               </div>
           </div>
       </div>
@@ -3619,8 +3646,7 @@ async function asyncInit() {
     initDynamicLayout();
 
     if (window.electronAPI) {
-        const dSettings = document.getElementById('desktop-focus-settings');
-        if (dSettings) dSettings.style.display = 'block';
+        initDesktopAppsList();
     }
 
     document.title = "Dashboard";
@@ -4323,17 +4349,188 @@ function switchModeInternally(m) {
     }
 }
 
+// --- NATIVE DESKTOP APPS BLOCKER & DND INTEGRATION ---
+let allInstalledApps = [];
+let selectedBlockedApps = [];
+
+async function initDesktopAppsList() {
+  if (!window.electronAPI) return;
+  
+  const toggleBtn = document.getElementById('desktop-settings-toggle-btn');
+  if (toggleBtn) toggleBtn.style.display = 'inline-flex';
+
+  try {
+    allInstalledApps = await window.electronAPI.getInstalledApps();
+    
+    // Load previously selected apps from localStorage
+    const saved = localStorage.getItem('KAAL_BLOCKED_APPS');
+    if (saved) {
+      selectedBlockedApps = JSON.parse(saved);
+    } else {
+      // Default selections
+      selectedBlockedApps = ['chrome.exe', 'msedge.exe', 'discord.exe', 'spotify.exe'];
+    }
+
+    renderBlockedAppsTags();
+    renderAppDropdownList();
+  } catch (err) {
+    console.error("Failed to load installed apps list:", err);
+  }
+}
+
+function toggleDesktopFocusSettings() {
+  const panel = document.getElementById('desktop-focus-settings');
+  const chevron = document.getElementById('desktop-settings-chevron');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    chevron.style.transform = 'rotate(180deg)';
+  } else {
+    panel.style.display = 'none';
+    chevron.style.transform = 'rotate(0deg)';
+  }
+}
+
+function toggleAppDropdown(event) {
+  event.stopPropagation();
+  const dropdown = document.getElementById('desktop-app-dropdown');
+  const isHidden = dropdown.style.display === 'none';
+  dropdown.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    document.getElementById('desktop-app-search').focus();
+  }
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  const dropdown = document.getElementById('desktop-app-dropdown');
+  const trigger = document.getElementById('desktop-dropdown-trigger');
+  if (dropdown && dropdown.style.display === 'block') {
+    if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
+      dropdown.style.display = 'none';
+    }
+  }
+});
+
+function renderBlockedAppsTags() {
+  const container = document.getElementById('desktop-selected-apps');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  if (selectedBlockedApps.length === 0) {
+    container.innerHTML = `<span style="font-size: 11px; color: var(--text3); font-style: italic;">No apps restricted</span>`;
+    return;
+  }
+  
+  selectedBlockedApps.forEach(exe => {
+    const appInfo = allInstalledApps.find(a => a.Exe.toLowerCase() === exe.toLowerCase());
+    const name = appInfo ? appInfo.Name : exe;
+    
+    const tag = document.createElement('div');
+    tag.style.cssText = `
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-pale, rgba(255, 56, 92, 0.08));
+      color: var(--primary, #FF385C);
+      border: 1px solid var(--primary-light, rgba(255, 56, 92, 0.15));
+      padding: 4px 10px;
+      border-radius: 50px;
+      font-size: 10px;
+      font-weight: 600;
+      transition: all 0.25s;
+    `;
+    tag.innerHTML = `
+      <span>${name}</span>
+      <i class="fa-solid fa-xmark" style="cursor: pointer; opacity: 0.6; transition: opacity 0.2s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.6'" onclick="removeBlockedApp('${exe}')"></i>
+    `;
+    container.appendChild(tag);
+  });
+}
+
+function renderAppDropdownList(searchQuery = '') {
+  const listContainer = document.getElementById('desktop-app-list');
+  if (!listContainer) return;
+  listContainer.innerHTML = '';
+
+  const query = searchQuery.toLowerCase().trim();
+  const filtered = allInstalledApps.filter(app => 
+    app.Name.toLowerCase().includes(query) || app.Exe.toLowerCase().includes(query)
+  );
+
+  if (filtered.length === 0) {
+    listContainer.innerHTML = `<div style="font-size: 11px; color: var(--text3); text-align: center; padding: 8px;">No apps found</div>`;
+    return;
+  }
+
+  filtered.forEach(app => {
+    const isChecked = selectedBlockedApps.some(exe => exe.toLowerCase() === app.Exe.toLowerCase());
+    
+    const item = document.createElement('div');
+    item.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px;
+      border-radius: var(--r1, 8px);
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--text1);
+      transition: background 0.2s;
+    `;
+    item.onmouseenter = () => { item.style.background = 'rgba(0,0,0,0.04)'; };
+    item.onmouseleave = () => { item.style.background = 'transparent'; };
+    item.onclick = (e) => {
+      const checkbox = item.querySelector('input');
+      checkbox.checked = !checkbox.checked;
+      toggleAppSelection(app.Exe, checkbox.checked);
+      e.stopPropagation();
+    };
+
+    item.innerHTML = `
+      <input type="checkbox" style="pointer-events: none; accent-color: var(--primary);" ${isChecked ? 'checked' : ''}>
+      <div style="display: flex; flex-direction: column; text-align: left;">
+        <span style="font-weight: 600; font-size: 11px;">${app.Name}</span>
+        <span style="font-size: 8.5px; color: var(--text2);">${app.Exe}</span>
+      </div>
+    `;
+    listContainer.appendChild(item);
+  });
+}
+
+function toggleAppSelection(exe, selected) {
+  exe = exe.toLowerCase().trim();
+  if (selected) {
+    if (!selectedBlockedApps.includes(exe)) {
+      selectedBlockedApps.push(exe);
+    }
+  } else {
+    selectedBlockedApps = selectedBlockedApps.filter(e => e.toLowerCase() !== exe);
+  }
+  localStorage.setItem('KAAL_BLOCKED_APPS', JSON.stringify(selectedBlockedApps));
+  renderBlockedAppsTags();
+}
+
+function removeBlockedApp(exe) {
+  selectedBlockedApps = selectedBlockedApps.filter(e => e.toLowerCase() !== exe.toLowerCase());
+  localStorage.setItem('KAAL_BLOCKED_APPS', JSON.stringify(selectedBlockedApps));
+  renderBlockedAppsTags();
+  renderAppDropdownList(document.getElementById('desktop-app-search')?.value || '');
+}
+
+function filterAppDropdown(val) {
+  renderAppDropdownList(val);
+}
+
 function startDesktopFocus() {
   if (!window.electronAPI) return;
   if (ps.mode !== 'work') return;
 
   const dndEnabled = document.getElementById('desktop-dnd-enable')?.checked || false;
   const blockEnabled = document.getElementById('desktop-block-enable')?.checked || false;
-  const blockText = document.getElementById('desktop-block-list')?.value || '';
   
   let blockList = [];
-  if (blockEnabled && blockText.trim()) {
-    blockList = blockText.split(',').map(s => s.trim()).filter(Boolean);
+  if (blockEnabled) {
+    blockList = [...selectedBlockedApps];
   }
 
   window.electronAPI.startFocus({
