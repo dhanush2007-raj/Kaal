@@ -1,6 +1,7 @@
-// Preload script for Kaal App
-// Allows bridging Electron APIs safely to the renderer process if needed.
+const { contextBridge, ipcRenderer } = require('electron');
 
-window.addEventListener('DOMContentLoaded', () => {
-  console.log("Kaal desktop wrapper loaded successfully via Electron.");
+// Expose safe APIs to the renderer process
+contextBridge.exposeInMainWorld('electronAPI', {
+  startFocus: (config) => ipcRenderer.send('start-focus', config),
+  stopFocus: () => ipcRenderer.send('stop-focus')
 });
