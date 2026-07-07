@@ -1,0 +1,57 @@
+{
+  "name": "kaal-app",
+  "version": "1.0.0",
+  "description": "Kaal - Elegant Focus, Task Management, & AI Productivity Companion",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack:win": "electron-builder --win",
+    "pack:mac": "electron-builder --mac",
+    "pack:linux": "electron-builder --linux",
+    "pack:all": "electron-builder -wml",
+    "mobile:init": "npm i @capacitor/core @capacitor/cli && npx cap init Kaal com.kaal.app --web-dir=.",
+    "mobile:android": "npm i @capacitor/android && npx cap add android && npx cap copy && npx cap open android",
+    "mobile:ios": "npm i @capacitor/ios && npx cap add ios && npx cap copy && npx cap open ios"
+  },
+  "keywords": [
+    "productivity",
+    "pomodoro",
+    "music",
+    "tasks",
+    "ai"
+  ],
+  "author": "Kaal Developer",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.2.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.kaal.app",
+    "productName": "Kaal",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "index.html",
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility"
+    }
+  }
+}

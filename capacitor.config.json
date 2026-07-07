@@ -1,0 +1,6 @@
+{
+  "appId": "com.kaal.app",
+  "appName": "Kaal",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
