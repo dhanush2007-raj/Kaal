@@ -5,13 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "pack:win": "electron-builder --win",
-    "pack:mac": "electron-builder --mac",
-    "pack:linux": "electron-builder --linux",
-    "pack:all": "electron-builder -wml",
-    "mobile:init": "npm i @capacitor/core @capacitor/cli && npx cap init Kaal com.kaal.app --web-dir=.",
-    "mobile:android": "npm i @capacitor/android && npx cap add android && npx cap copy && npx cap open android",
-    "mobile:ios": "npm i @capacitor/ios && npx cap add ios && npx cap copy && npx cap open ios"
+    "pack:win": "electron-builder --win"
   },
   "keywords": [
     "productivity",
@@ -39,19 +33,14 @@
       "package.json"
     ],
     "win": {
-      "target": "nsis",
-      "icon": "icon.ico"
+      "target": "nsis"
     },
-    "mac": {
-      "target": "dmg",
-      "category": "public.app-category.productivity"
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ],
-      "category": "Utility"
+    "nsis": {
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Kaal"
     }
   }
 }
