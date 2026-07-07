@@ -8180,6 +8180,52 @@ function renderGcdpGrid() {
 
   window.initChat = initChatFallback;
   setTimeout(initChatFallback, 200);
+
+  // Listen for Electron auto-update downloaded event
+  if (window.electronAPI && typeof window.electronAPI.onUpdateDownloaded === 'function') {
+    window.electronAPI.onUpdateDownloaded(() => {
+      if (document.getElementById('kaal-update-banner')) return;
+
+      const banner = document.createElement('div');
+      banner.id = 'kaal-update-banner';
+      banner.style.cssText = `
+        position: fixed;
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(15, 23, 42, 0.9);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-size: 13px;
+        font-weight: 600;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        z-index: 100000;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      `;
+
+      banner.innerHTML = `
+        <span>✨ A new update is ready! Click to reload & apply.</span>
+        <span style="background: var(--primary, #6366f1); padding: 4px 12px; border-radius: 20px; font-size: 11px;">Relaunch</span>
+      `;
+
+      banner.onclick = () => {
+        window.location.reload();
+      };
+
+      document.body.appendChild(banner);
+
+      setTimeout(() => {
+        banner.style.top = '24px';
+      }, 100);
+    });
+  }
 })();
 </script>
 </body>
