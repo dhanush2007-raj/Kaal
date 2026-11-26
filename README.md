@@ -115,4 +115,4 @@ The installer is written to the `dist` folder. The build configuration expects a
 
 ## License
 
-Released under the [ISC License](LICENSE).
+Released under the [MIT License](LICENSE).
