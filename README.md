@@ -63,7 +63,7 @@ Both are undone when the session stops or the window closes.
 
 ### Using Kaal on macOS
 
-The app is built with Electron, so the interface runs on a Mac. The focus mode code only knows Windows commands (`powershell`, `tasklist`, `taskkill`). On a Mac those commands do not exist, so the focus timer works but silencing notifications and blocking apps do nothing. I have not tested Kaal on a Mac, so this comes from reading the code.
+The app is built with Electron, so the interface runs on a Mac. The focus mode code only knows Windows commands (`powershell`, `tasklist`, `taskkill`). On a Mac those commands do not exist, so the focus timer works but silencing notifications and blocking apps do nothing. I have not tested Kaal on a Mac.
 
 Other limits on macOS:
 
