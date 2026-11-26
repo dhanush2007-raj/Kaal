@@ -4,6 +4,8 @@ Kaal is a desktop productivity app for focused work. It puts a focus timer, task
 
 The name "Kaal" means "time" in Hindi.
 
+**Try it online:** https://dhanush2007-raj.github.io/Kaal/
+
 > **Warning: Kaal is still in development.**
 >
 > - Features may change, break or be removed without notice.
